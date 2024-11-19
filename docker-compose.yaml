@@ -1,0 +1,15 @@
+version: "3"
+services:
+  hop-etl:
+    build:
+      context: .
+    image: apache-hop:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8079:8079"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./files:/files
+      - ./apache-hop-mappings:/opt/hop/config/projects/mappings/
+    env_file:
+      - hop.env
