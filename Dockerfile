@@ -37,7 +37,6 @@ RUN ( curl -fsS https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries
     curl -fsS https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz -o apache-maven-${MAVEN_VERSION}-bin.tar.gz ) && \
     tar xfz apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
     rm apache-maven-${MAVEN_VERSION}-bin.tar.gz
-#COPY apache-maven-${MAVEN_VERSION}-bin.tar.gz .
 
 ENV PATH="$PATH:/src/apache-maven-${MAVEN_VERSION}/bin"
 RUN ls -la && mvn --version || exit 1
@@ -52,12 +51,6 @@ WORKDIR /src/
 
 ARG HOP_VERSION=2.9.0
 
-## Push sources
-#ADD https://github.com/apache/hop/archive/refs/tags/${HOP_VERSION}-rc1.tar.gz .
-#RUN \
-#    git config --global user.email "docker@build.none" && \
-#    git config --global user.name "Docker Build" && \
-##    git clone --single-branch --depth 1 --branch release/$HOP_VERSION https://github.com/apache/hop.git
 RUN mkdir -p /src/hop
 COPY ./ /src/hop
 
@@ -73,9 +66,6 @@ RUN mkdir -p /src/hop/.mvn-repo/com/splunk/splunk/1.6.5.0 && \
 ENV MAVEN_OPTS="-Dmaven.repo.local=/src/hop/.mvn-repo"
 
 WORKDIR /src/hop
-
-# enable local maven proxy
-#COPY settings.xml $M2_HOME/conf/
 
 # download dependencies
 RUN mvn clean -T4C dependency:go-offline -Dmaven.test.skip --batch-mode --no-transfer-progress || exit 0
@@ -166,12 +156,6 @@ ENV HOP_SERVER_MAX_LOG_LINES=
 ENV HOP_SERVER_MAX_LOG_TIMEOUT=
 ENV HOP_SERVER_MAX_OBJECT_TIMEOUT=
 
-# Define en_US.
-# ENV LANGUAGE en_US.UTF-8
-# ENV LANG en_US.UTF-8
-# ENV LC_ALL en_US.UTF-8
-# ENV LC_CTYPE en_US.UTF-8
-# ENV LC_MESSAGES en_US.UTF-8
 
 ENV PACKAGES_DEBIAN=" \
     bash \
@@ -195,13 +179,6 @@ RUN apt-get update -qq -y && \
     apt-get clean && \
     rm -rf /var/cache/apt && \
     fc-cache -f
-
-## Define locale
-#ENV LANGUAGE en_US.UTF-8
-#ENV LANG en_US.UTF-8
-#ENV LC_ALL en_US.UTF-8
-#ENV LC_CTYPE en_US.UTF-8
-#ENV LC_MESSAGES en_US.UTF-8
 
 
 RUN chmod 777 -R /tmp && chmod o+t -R /tmp
@@ -255,5 +232,5 @@ ENV PATH=$PATH:${DEPLOYMENT_PATH}/hop
 WORKDIR ${WORKING_PATH}
 
 ENTRYPOINT ["/bin/bash", "-c"]
-#CMD ["/opt/hop/run.sh"]
+
 CMD ["/opt/hop/entrypoint.sh"]
